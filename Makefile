@@ -1,10 +1,11 @@
-create-env:
-	conda env create -f environment.yml
-	conda activate lig3dlens
-
 tidy:
-	isort . --profile black
-	black .
+	isort lig3dlens tests --profile black
+	black lig3dlens tests
+
+lint:
+	ruff check lig3dlens tests
+	isort lig3dlens tests --check-only --profile black
+	black --diff lig3dlens tests
 
 test:
-	pytest tests/
+	pytest -s --cov=lig3dlens --cov-report term-missing tests/
