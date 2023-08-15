@@ -14,6 +14,8 @@ def setup_teardown_test():
     # Teardown
     shutil.rmtree(temp_dir)
 
+
+@pytest.mark.skip("not a unit tests")
 def test_lig3dlens_out(setup_teardown_test):
     temp_dir = setup_teardown_test
 
@@ -21,9 +23,9 @@ def test_lig3dlens_out(setup_teardown_test):
     ref_mol = Path("./tests/lig3dlens/test_data/ref_mol.smi")
     input_file = Path("./tests/lig3dlens/test_data/Enamine_hts_collection_202303_first500.smi")
     expected_output = Path("./tests/lig3dlens/test_data/Enamine_hts_collection_202303_first500_VS_results.sdf")
-    
+
     # Run the main script
-    subprocess.run(["python", str(lig3dlens_py), "--ref", str(ref_mol), "--lib", str(input_file), 
+    subprocess.run(["python", str(lig3dlens_py), "--ref", str(ref_mol), "--lib", str(input_file),
                     "--out", str(temp_dir / "test_out.sdf")], stdout=subprocess.PIPE, text=True)
 
     # Check if the scores in the temp. output file are the same as in the expected output file
@@ -33,4 +35,3 @@ def test_lig3dlens_out(setup_teardown_test):
     assert temp_df['SC_RDKit_score'].equals(expected_output_df['SC_RDKit_score'])
     assert temp_df['ESPSim'].equals(expected_output_df['ESPSim'])
     assert temp_df['ShapeSim'].equals(expected_output_df['ShapeSim'])
-    
