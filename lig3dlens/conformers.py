@@ -33,7 +33,7 @@ def generate_conformers(
     Mol
         Mutated Mol object with conformers generated.
     """
-    
+
     molecule.RemoveAllConformers()
 
     if add_hydrogens:
@@ -54,12 +54,15 @@ def generate_conformers(
 
     if optimize:
         AllChem.MMFFOptimizeMoleculeConfs(molecule, mmffVariant="MMFF94s")
-    
+
     # Trying to catch some edge cases (mainly with bridged ring systems)
     if molecule.GetNumConformers() > 0:
         return molecule
     else:
-        logger.error(f'Failed to generate 3D confs for {Chem.MolToSmiles(Chem.RemoveHs(molecule))}')
+        logger.error(
+            f"Failed to generate 3D confs for {Chem.MolToSmiles(Chem.RemoveHs(molecule))}"
+        )
+
 
 def conf_gen(molecule: Mol, mol_id: str, num_conformers: int) -> Tuple[str, Mol]:
     """
@@ -80,8 +83,10 @@ def conf_gen(molecule: Mol, mol_id: str, num_conformers: int) -> Tuple[str, Mol]
         A tuple containing the molecule ID and the Mol object mutated to have conformers computed.
     """
     if isinstance(molecule, Mol):
-        h_mol = generate_conformers(molecule, num_conformers, prune_rms_threshold=0.5, add_hydrogens=True)
-       
+        h_mol = generate_conformers(
+            molecule, num_conformers, prune_rms_threshold=0.5, add_hydrogens=True
+        )
+
         return mol_id, h_mol
 
 
@@ -89,6 +94,6 @@ def conf_gen(molecule: Mol, mol_id: str, num_conformers: int) -> Tuple[str, Mol]
 # We can also use functools.partial to create a partial function of conf_gen
 # map_conf_gen = partial(conf_gen)
 
+
 def map_conf_gen(args):
     return conf_gen(*args)
-
