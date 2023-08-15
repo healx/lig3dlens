@@ -2,3 +2,4 @@ black
 ruff
 isort
 pytest
+pytest-cov
