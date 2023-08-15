@@ -10,13 +10,7 @@ Lig3DLens performs the following tasks:
 ## Installation
 
 ```
-conda env create -f environment.yml
-conda activate lig3dlens
-```
-
-The above are also executable via the makefile command:
-```
-make create-env
+python -m pip install -r requirements.txt .
 ```
 
 ## Running a ligand-based 3D VS campaign
@@ -66,5 +60,3 @@ export MKL_THREADING_LAYER=GNU
 - Compound selection: 
     * Multi-parameter selection of compounds using a score function that includes the 3D score, 2D similarity to the reference compound, and the physchem properties. The aim is to get an even distribution between highly scored cmpds and other properties.
     * Select an optimal number of clusters instead of a predefined one (e.g. using Silhouette). Alternatively, using another method for maximum score-diversity selection problem (e.g. Score Erosion algorithm).
-
-
