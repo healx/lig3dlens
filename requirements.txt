@@ -17,8 +17,3 @@ git+https://github.com/hesther/espsim.git@533a53105858d1a25cbe2fb54dd7208d7989ca
 
 # ?
 jupyter
-
-# dev
-black
-isort
-pytest

@@ -1,8 +1,10 @@
 import collections
+
 from loguru import logger
 from rdkit import Chem
 
 SearchConfig = collections.namedtuple("SearchConfig", ["ref_mol", "mols_to_align"])
+
 
 class MolFileReader:
     def __init__(self, ref_mol_file_path: str, mols_to_align_file_path: str):
@@ -12,7 +14,7 @@ class MolFileReader:
     def smiles_parser(self, file_path):
         with open(file_path, "r") as f:
             # Smiles files contains SMILES and title/ID, separated by commas
-            ref_smi = f.readline().split(',')[0]
+            ref_smi = f.readline().split(",")[0]
             ref_mol = Chem.MolFromSmiles(ref_smi)
         return ref_mol
 
@@ -60,7 +62,9 @@ class MolFileReader:
         elif ref_file_type == "sdf":
             ref_mol = self.sdf_parser(self.ref_mol_file_path)
         else:
-            raise ValueError("Only `.smi` and `.sdf` files are supported for reference mol.")
+            raise ValueError(
+                "Only `.smi` and `.sdf` files are supported for reference mol."
+            )
 
         if align_file_type == "smiles":
             mols_to_align = self.smiles_supplier_parser(self.mols_to_align_file_path)
@@ -73,7 +77,6 @@ class MolFileReader:
 
         logger.debug(f"#{len(mols_to_align)} compounds were parsed")
         return ref_mol, mols_to_align
-        
 
     def process(self) -> SearchConfig:
         ref_mol, mols_to_align = self.parse_files()

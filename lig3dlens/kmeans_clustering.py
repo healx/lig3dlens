@@ -1,15 +1,14 @@
-import numpy as np
-from sklearn.cluster import MiniBatchKMeans
-from scipy.spatial.distance import cdist
-import pandas as pd
+from typing import List, Union
 
-from typing import Union, List
 import click
-from loguru import logger
-
 import datamol as dm
+from loguru import logger
 from molfeat.calc import FPCalculator
 from molfeat.trans import MoleculeTransformer
+import numpy as np
+import pandas as pd
+from scipy.spatial.distance import cdist
+from sklearn.cluster import MiniBatchKMeans
 
 
 def find_cluster_centers_opt(
@@ -165,8 +164,12 @@ if __name__ == "__main__":
                 "atompair-count",
             ]
         ),
-        help="Fingerprint type (must be one of maccs, ecfp, fcfp, topological, atompair, rdkit, pattern, layered, \
-                                         erg, estate, avalon-count, rdkit-count, ecfp-count, fcfp-count, topological-count, atompair-count)",
+        help=(
+                "Fingerprint type (must be one of maccs, ecfp, fcfp, topological, "
+                "atompair, rdkit, pattern, layered, erg, estate, avalon-count, "
+                "rdkit-count, ecfp-count, fcfp-count, topological-count, "
+                "atompair-count)",
+        )
     )
     def cli(infile_name, clusters, outfile_name, fp_dim, fp_type):
         main(infile_name, clusters, outfile_name, fp_dim, fp_type)

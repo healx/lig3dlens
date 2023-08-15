@@ -2,14 +2,13 @@ import multiprocessing
 from pathlib import Path
 from typing import Optional
 
-from loguru import logger
+import alignment
 import click
+import conformers
+from loguru import logger
+import parsers
 from rdkit import Chem
 from tqdm import tqdm
-
-import alignment
-import conformers
-import parsers
 
 
 def prep_input(mol_dict: dict[str, Chem.Mol], num_conformers: int):
@@ -27,7 +26,8 @@ def run_alignment(
 
     Parameters
     ----------
-    search_config: A SearchConfig with the reference molecule and the molecules to be aligned
+    search_config: A SearchConfig with the reference molecule and the molecules to be
+        aligned
     num_conformers: Number of conformers
     output_file: Optional file path
 
@@ -47,7 +47,8 @@ def run_alignment(
     Chem.SDWriter(f"{output_path}/ref_mol-3D.sdf").write(href_mol)
 
     logger.info(
-        "3D conformation of the reference compound has been stored in current working dir."
+        "3D conformation of the reference compound has been stored in current working"
+        " dir."
     )
 
     # output file to store the best overlays

@@ -122,9 +122,7 @@ def score_alignment(
     )
 
 
-def rdkit_score(
-        query_mol: Mol, ref_mol: Mol, query_id: int, ref_id: int
-    ) -> float:
+def rdkit_score(query_mol: Mol, ref_mol: Mol, query_id: int, ref_id: int) -> float:
     """
     Function to calculate the feature map score
 
