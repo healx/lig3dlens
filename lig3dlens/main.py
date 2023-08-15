@@ -2,14 +2,13 @@ import multiprocessing
 from pathlib import Path
 from typing import Optional
 
-from loguru import logger
+import alignment
 import click
+import conformers
+from loguru import logger
+import parsers
 from rdkit import Chem
 from tqdm import tqdm
-
-import alignment
-import conformers
-import parsers
 
 
 def prep_input(mol_dict: dict[str, Chem.Mol], num_conformers: int):

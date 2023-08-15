@@ -1,15 +1,14 @@
-import numpy as np
-from sklearn.cluster import MiniBatchKMeans
-from scipy.spatial.distance import cdist
-import pandas as pd
+from typing import List, Union
 
-from typing import Union, List
 import click
-from loguru import logger
-
 import datamol as dm
+from loguru import logger
 from molfeat.calc import FPCalculator
 from molfeat.trans import MoleculeTransformer
+import numpy as np
+import pandas as pd
+from scipy.spatial.distance import cdist
+from sklearn.cluster import MiniBatchKMeans
 
 
 def find_cluster_centers_opt(

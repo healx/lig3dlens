@@ -1,9 +1,10 @@
-import subprocess
-import pytest
 from pathlib import Path
-from rdkit.Chem import PandasTools
-import tempfile
 import shutil
+import subprocess
+import tempfile
+
+import pytest
+from rdkit.Chem import PandasTools
 
 
 @pytest.fixture(scope="function")

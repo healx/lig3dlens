@@ -1,7 +1,8 @@
 from typing import Tuple
+
+from loguru import logger
 from rdkit import Chem
 from rdkit.Chem import AllChem, Mol
-from loguru import logger
 
 
 def generate_conformers(
