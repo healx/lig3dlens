@@ -1,0 +1,24 @@
+rdkit
+# pytorch -- causing difficulties, revisit
+numpy
+scikit-learn
+datamol
+molfeat
+scipy
+matplotlib
+joblib
+loguru
+tqdm
+py3dmol
+# psi4 -- no matching distribution found
+resp
+git+https://github.com/hesther/chemprop-atom-bond.git@09a2e32636bbd252c26a28d06ff865e364e398bf
+git+https://github.com/hesther/espsim.git@533a53105858d1a25cbe2fb54dd7208d7989caa1
+
+# ?
+jupyter
+
+# dev
+black
+isort
+pytest
