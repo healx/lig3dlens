@@ -1,7 +1,6 @@
 from typing import Tuple
 from rdkit import Chem
 from rdkit.Chem import AllChem, Mol
-from functools import partial
 from loguru import logger
 
 
@@ -60,7 +59,8 @@ def generate_conformers(
         return molecule
     else:
         logger.error(
-            f"Failed to generate 3D confs for {Chem.MolToSmiles(Chem.RemoveHs(molecule))}"
+            "Failed to generate 3D confs for %s",
+            Chem.MolToSmiles(Chem.RemoveHs(molecule)),
         )
 
 
@@ -80,7 +80,8 @@ def conf_gen(molecule: Mol, mol_id: str, num_conformers: int) -> Tuple[str, Mol]
     Returns
     -------
     Tuple[str, Mol]
-        A tuple containing the molecule ID and the Mol object mutated to have conformers computed.
+        A tuple containing the molecule ID and the Mol object mutated to have conformers
+        computed.
     """
     if isinstance(molecule, Mol):
         h_mol = generate_conformers(

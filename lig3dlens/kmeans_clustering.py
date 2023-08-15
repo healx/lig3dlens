@@ -165,8 +165,12 @@ if __name__ == "__main__":
                 "atompair-count",
             ]
         ),
-        help="Fingerprint type (must be one of maccs, ecfp, fcfp, topological, atompair, rdkit, pattern, layered, \
-                                         erg, estate, avalon-count, rdkit-count, ecfp-count, fcfp-count, topological-count, atompair-count)",
+        help=(
+                "Fingerprint type (must be one of maccs, ecfp, fcfp, topological, "
+                "atompair, rdkit, pattern, layered, erg, estate, avalon-count, "
+                "rdkit-count, ecfp-count, fcfp-count, topological-count, "
+                "atompair-count)",
+        )
     )
     def cli(infile_name, clusters, outfile_name, fp_dim, fp_type):
         main(infile_name, clusters, outfile_name, fp_dim, fp_type)

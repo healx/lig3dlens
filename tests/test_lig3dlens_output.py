@@ -1,5 +1,4 @@
 import subprocess
-import filecmp
 import pytest
 from pathlib import Path
 from rdkit.Chem import PandasTools
@@ -45,7 +44,8 @@ def test_lig3dlens_out(setup_teardown_test):
         text=True,
     )
 
-    # Check if the scores in the temp. output file are the same as in the expected output file
+    # Check if the scores in the temp. output file are the same as in the expected
+    # output file
     temp_df = PandasTools.LoadSDF(temp_dir / "test_out.sdf")
     expected_output_df = PandasTools.LoadSDF(expected_output)
 
