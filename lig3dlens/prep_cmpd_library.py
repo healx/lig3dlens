@@ -1,3 +1,12 @@
+# ----------------------------------------------------------------------------
+# Authors: Bill Tatsis, Matt Seddon, Dan Mason, and Dan O'Donovan
+# Company: Healx
+# Date: August 17, 2023
+#
+# Description: This script standardises a chemical library and filters compounds
+#              based on user defined physchem criteria
+# ----------------------------------------------------------------------------
+
 import gc
 
 import click

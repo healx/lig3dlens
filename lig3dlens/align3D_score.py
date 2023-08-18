@@ -1,3 +1,12 @@
+# ----------------------------------------------------------------------------
+# Authors: Bill Tatsis, Matt Seddon, Dan Mason, and Dan O'Donovan
+# Company: Healx
+# Date: August 17, 2023
+#
+# Description: This script performs a 3D overlay of a probe and reference molecule
+#              and returns similarity scores of the two compounds
+# ----------------------------------------------------------------------------
+
 import collections
 import copy
 import os

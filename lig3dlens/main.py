@@ -1,10 +1,18 @@
+# ----------------------------------------------------------------------------
+# Authors: Bill Tatsis, Matt Seddon, Dan Mason, and Dan O'Donovan
+# Company: Healx
+# Date: August 17, 2023
+#
+# Description: This is the main script used to run the ligand-based 3D VS
+# ----------------------------------------------------------------------------
+
 import multiprocessing
 from pathlib import Path
 from typing import Optional
 
-import alignment
+import align3D_score
 import click
-import conformers
+import gen_conformers
 from loguru import logger
 import parsers
 from rdkit import Chem

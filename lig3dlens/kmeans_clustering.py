@@ -1,3 +1,13 @@
+# ----------------------------------------------------------------------------
+# Authors: Bill Tatsis, Matt Seddon, Dan Mason, and Dan O'Donovan
+# Company: Healx
+# Date: August 17, 2023
+#
+# Description: This script helps to select a diverse set of compounds, by first  
+#              clustering the compounds of the input file and then selecting 
+#              the clusters' centers
+# ----------------------------------------------------------------------------
+
 from typing import List, Union
 
 import click
