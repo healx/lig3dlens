@@ -12,11 +12,11 @@ from typing import List, Union
 
 import click
 import datamol as dm
+import numpy as np
+import pandas as pd
 from loguru import logger
 from molfeat.calc import FPCalculator
 from molfeat.trans import MoleculeTransformer
-import numpy as np
-import pandas as pd
 from scipy.spatial.distance import cdist
 from sklearn.cluster import MiniBatchKMeans
 

@@ -11,10 +11,10 @@ import gc
 
 import click
 import datamol as dm
-from loguru import logger
 import pandas as pd
-from rdkit import Chem, RDLogger
 import yaml
+from loguru import logger
+from rdkit import Chem, RDLogger
 
 RDLogger.DisableLog("rdApp.*")
 
