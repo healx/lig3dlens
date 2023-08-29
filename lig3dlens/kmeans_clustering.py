@@ -1,12 +1,22 @@
+# ----------------------------------------------------------------------------
+# Authors: Bill Tatsis, Matt Seddon, Dan Mason, and Dan O'Donovan
+# Company: Healx
+# Date: August 17, 2023
+#
+# Description: This script helps to select a diverse set of compounds, by first
+#              clustering the compounds of the input file and then selecting
+#              the clusters' centers
+# ----------------------------------------------------------------------------
+
 from typing import List, Union
 
 import click
 import datamol as dm
+import numpy as np
+import pandas as pd
 from loguru import logger
 from molfeat.calc import FPCalculator
 from molfeat.trans import MoleculeTransformer
-import numpy as np
-import pandas as pd
 from scipy.spatial.distance import cdist
 from sklearn.cluster import MiniBatchKMeans
 

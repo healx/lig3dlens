@@ -1,3 +1,11 @@
+# ----------------------------------------------------------------------------
+# Authors: Bill Tatsis, Matt Seddon, Dan Mason, and Dan O'Donovan
+# Company: Healx
+# Date: August 17, 2023
+#
+# Description: This script generates 3D conformers for a given Mol.
+# ----------------------------------------------------------------------------
+
 from typing import Tuple
 
 from loguru import logger
