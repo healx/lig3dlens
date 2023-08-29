@@ -10,13 +10,14 @@ import multiprocessing
 from pathlib import Path
 from typing import Optional
 
-import align3D_score
 import click
-import gen_conformers
-from loguru import logger
 import parsers
+from loguru import logger
 from rdkit import Chem
 from tqdm import tqdm
+
+from .align3D_score import score_alignment
+from .gen_conformers import generate_conformers, map_conf_gen
 
 
 def prep_input(mol_dict: dict[str, Chem.Mol], num_conformers: int):
@@ -45,7 +46,7 @@ def run_alignment(
     """
 
     # Generate reference mol
-    href_mol = conformers.generate_conformers(
+    href_mol = generate_conformers(
         search_config.ref_mol, num_conformers=1, optimize=True
     )
 
@@ -68,13 +69,13 @@ def run_alignment(
     with multiprocessing.Pool(num_processes) as pool:
         try:
             for mol_id, mol in pool.imap_unordered(
-                conformers.map_conf_gen,
+                map_conf_gen,
                 prep_input(search_config.mols_to_align, num_conformers),
                 chunksize=10,
             ):
                 if mol is not None:
                     # Retrieve scores and conformer with the best 3D shape score
-                    alignment_score = alignment.score_alignment(mol, href_mol)
+                    alignment_score = score_alignment(mol, href_mol)
 
                     best_mol = alignment_score.best_mol
 
