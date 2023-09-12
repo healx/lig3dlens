@@ -6,23 +6,44 @@
 # Description: This is the main script used to run the ligand-based 3D VS
 # ----------------------------------------------------------------------------
 
-import multiprocessing
-from pathlib import Path
-from typing import Optional
-
 import click
-import parsers
 from loguru import logger
-from rdkit import Chem
-from tqdm import tqdm
 
 from lig3dlens.alignment import run_alignment
-from .align3D_score import score_alignment
-from .gen_conformers import generate_conformers, map_conf_gen
+from lig3dlens.parsers import MolFileReader
 
 
-def main(input_refmol, input_mols_to_align, num_conformers, output_file):
-    mol_file_reader = parsers.MolFileReader(input_refmol, input_mols_to_align)
+@click.command(name="alignment")
+@click.option(
+    "--ref",
+    "input_refmol",
+    type=str,
+    required=True,
+    help="Input reference cmpd file name",
+)
+@click.option(
+    "--lib",
+    "input_mols_to_align",
+    type=str,
+    required=True,
+    help="Input cmpd library file name",
+)
+@click.option(
+    "--out",
+    "output_file",
+    type=str,
+    required=True,
+    help="Output .sd file with Mol blocks, ID columns, and 3D scores",
+)
+@click.option(
+    "--conf",
+    "num_conformers",
+    type=int,
+    default=10,
+    help="Number of conformers for each of the cmpds in the library",
+)
+def main(input_refmol, input_mols_to_align, output_file, num_conformers):
+    mol_file_reader = MolFileReader(input_refmol, input_mols_to_align)
     search_config = mol_file_reader.process()
 
     logger.info(
@@ -37,37 +58,4 @@ def main(input_refmol, input_mols_to_align, num_conformers, output_file):
 
 
 if __name__ == "__main__":
-
-    @click.command("input_output")
-    @click.option(
-        "--ref",
-        "input_refmol",
-        type=str,
-        required=True,
-        help="Input reference cmpd file name",
-    )
-    @click.option(
-        "--lib",
-        "input_mols_to_align",
-        type=str,
-        required=True,
-        help="Input cmpd library file name",
-    )
-    @click.option(
-        "--out",
-        "output_file",
-        type=str,
-        required=True,
-        help="Output .sd file with Mol blocks, ID columns, and 3D scores",
-    )
-    @click.option(
-        "--conf",
-        "num_conformers",
-        type=int,
-        default=10,
-        help="Number of conformers for each of the cmpds in the library",
-    )
-    def cli(input_refmol, input_mols_to_align, num_conformers, output_file):
-        main(input_refmol, input_mols_to_align, num_conformers, output_file)
-
-    cli()
+    main()
