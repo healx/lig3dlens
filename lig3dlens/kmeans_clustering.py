@@ -104,7 +104,56 @@ def kmeans_cluster(df: pd.DataFrame, num_clusters: int) -> pd.DataFrame:
     return df
 
 
-def main(infile_name, clusters, outfile_name, fp_dim, fp_type):
+@click.command(name="cluster")
+@click.option("--in", "infile_name", required=True, help="Input file name")
+@click.option(
+    "--out",
+    "outfile_name",
+    required=True,
+    help="Output csv file with SMILES, molecule name, and cluster id",
+)
+@click.option(
+    "--clusters",
+    "clusters",
+    type=int,
+    required=True,
+    help="Number of clusters to output",
+)
+@click.option(
+    "--dim", "fp_dim", type=int, default=1024, help="Number of fingerprint bits"
+)
+@click.option(
+    "--fp_type",
+    "fp_type",
+    default="ecfp",
+    type=click.Choice(
+        [
+            "maccs",
+            "ecfp",
+            "fcfp",
+            "topological",
+            "atompair",
+            "rdkit",
+            "pattern",
+            "layered",
+            "erg",
+            "estate",
+            "avalon-count",
+            "rdkit-count",
+            "ecfp-count",
+            "fcfp-count",
+            "topological-count",
+            "atompair-count",
+        ]
+    ),
+    help=(
+        "Fingerprint type (must be one of maccs, ecfp, fcfp, topological, "
+        "atompair, rdkit, pattern, layered, erg, estate, avalon-count, "
+        "rdkit-count, ecfp-count, fcfp-count, topological-count, "
+        "atompair-count)"
+    ),
+)
+def main(infile_name, outfile_name, clusters, fp_dim, fp_type):
     logger.info(f"Loading cmpds from {infile_name} to a Pandas dataframe")
 
     vs_hits = dm.read_sdf(infile_name, as_df=True, mol_column="ROMol")
@@ -131,57 +180,4 @@ def main(infile_name, clusters, outfile_name, fp_dim, fp_type):
 
 
 if __name__ == "__main__":
-
-    @click.command("input_output")
-    @click.option("--in", "infile_name", required=True, help="Input file name")
-    @click.option(
-        "--out",
-        "outfile_name",
-        required=True,
-        help="Output csv file with SMILES, molecule name, and cluster id",
-    )
-    @click.option(
-        "--clusters",
-        "clusters",
-        type=int,
-        required=True,
-        help="Number of clusters to output",
-    )
-    @click.option(
-        "--dim", "fp_dim", type=int, default=1024, help="Number of fingerprint bits"
-    )
-    @click.option(
-        "--fp_type",
-        "fp_type",
-        default="ecfp",
-        type=click.Choice(
-            [
-                "maccs",
-                "ecfp",
-                "fcfp",
-                "topological",
-                "atompair",
-                "rdkit",
-                "pattern",
-                "layered",
-                "erg",
-                "estate",
-                "avalon-count",
-                "rdkit-count",
-                "ecfp-count",
-                "fcfp-count",
-                "topological-count",
-                "atompair-count",
-            ]
-        ),
-        help=(
-            "Fingerprint type (must be one of maccs, ecfp, fcfp, topological, "
-            "atompair, rdkit, pattern, layered, erg, estate, avalon-count, "
-            "rdkit-count, ecfp-count, fcfp-count, topological-count, "
-            "atompair-count)",
-        ),
-    )
-    def cli(infile_name, clusters, outfile_name, fp_dim, fp_type):
-        main(infile_name, clusters, outfile_name, fp_dim, fp_type)
-
-    cli()
+    main()

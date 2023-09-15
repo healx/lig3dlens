@@ -94,6 +94,24 @@ def _calculate_descriptors(
     return row
 
 
+@click.command(name="prepare")
+@click.option(
+    "--in", "input_cmpd_lib", type=str, required=True, help="Input compound library"
+)
+@click.option(
+    "--filter",
+    "input_physchem_props",
+    type=str,
+    required=True,
+    help="yaml file with physicochemical properties filters",
+)
+@click.option(
+    "--out",
+    "output_name",
+    type=str,
+    required=True,
+    help="Output SD file with Mols & ID columns",
+)
 def main(input_cmpd_lib, input_physchem_props, output_file):
     logger.info(
         "Initialising the compound library preparation workflow",
@@ -224,26 +242,4 @@ def main(input_cmpd_lib, input_physchem_props, output_file):
 
 
 if __name__ == "__main__":
-
-    @click.command("input_output")
-    @click.option(
-        "--in", "input_cmpd_lib", type=str, required=True, help="Input compound library"
-    )
-    @click.option(
-        "--filter",
-        "input_physchem_props",
-        type=str,
-        required=True,
-        help="yaml file with physicochemical properties filters",
-    )
-    @click.option(
-        "--out",
-        "output_name",
-        type=str,
-        required=True,
-        help="Output SD file with Mols & ID columns",
-    )
-    def cli(input_cmpd_lib, input_physchem_props, output_file):
-        main(input_cmpd_lib, input_physchem_props, output_file)
-
-    cli()
+    main()
