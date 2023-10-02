@@ -19,7 +19,7 @@ class MolFileReader:
         return ref_mol
 
     def sdf_parser(self, file_path):
-        ref_mol = next(Chem.SDMolSupplier(file_path))
+        ref_mol = next(Chem.SDMolSupplier(str(file_path)))
         # remove all conformers and return the Mol object
         ref_mol.RemoveAllConformers()
         return ref_mol
