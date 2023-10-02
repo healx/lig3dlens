@@ -17,18 +17,18 @@ python -m pip install -r requirements.txt .
 
 1. Prepare a library of compounds for virtual screening
 ```
-python prep_cmpds_library.py --in input_SD_file --filter physchem_yaml_file --out output_SD_file
+lig3lens-prepare --in input_SD_file --filter physchem_yaml_file --out output_SD_file
 ```
 
 2. Generated 3D conformers for both the library and refernce compounds and score the library compounds 
 using a 3D shape & electrostatics similarity function
 ```
-python main.py --ref input_reference_molecule_file --lib input_library_file_name --conf num_conformers --out output_SD_file
+lig3dlens-align --ref input_reference_molecule_file --lib input_library_file_name --conf num_conformers --out output_SD_file
 ```
 
 3. Cluster the highest scoring molecules and select a representative set
 ```
-python kmeans_clustering.py –in input_SD_file –clusters num_clusters –out output_file –dim fingerprint_dimension –fp_type fingerprint_type
+lig3dlens-cluster –-in input_SD_file –-clusters num_clusters –-out output_file -–dim fingerprint_dimension -–fp_type fingerprint_type
 ```
 
 ## Development
