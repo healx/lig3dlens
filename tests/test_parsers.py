@@ -1,5 +1,3 @@
-from textwrap import dedent
-
 import pytest
 
 from lig3dlens.parsers import MolFileReader
