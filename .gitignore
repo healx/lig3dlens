@@ -3,4 +3,5 @@ __pycache__
 
 # IDE files
 .idea
-.python-version
+./build
+python-version
