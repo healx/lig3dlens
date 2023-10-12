@@ -1,6 +1,6 @@
 # Ligand-based 3D Virtual Screening
 ## Lig3DLens
-Bill Tatsis, Dan Mason, Dan O'Donovan, Gio Cincilla, Azedine Zoufir and Nath Brown
+Bill Tatsis, Matt Seddon, Dan Mason, Dan O'Donovan, Gio Cincilla, Azedine Zoufir and Nath Brown
 
 Lig3DLens performs the following tasks:
 1. Prepares a commercial compound library to be used for a VS campaign. This task
