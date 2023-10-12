@@ -3,5 +3,7 @@ __pycache__
 
 # IDE files
 .idea
-./build
-python-version
+.python-version
+
+# test artefacts
+*.tox
