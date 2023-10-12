@@ -31,10 +31,17 @@ class MolFileReader:
         return {m.GetProp("_Name"): m for m in suppl if m is not None}
 
     def sdf_supplier_parser(self, file_path):
+        ## Get the ID tag from SD file
+        sdsuppl = Chem.SDMolSupplier(file_path)
+        # Read the first molecule from the SD file
+        m1 = next(sdsuppl, None)
+        # Copy SD tags/properties to a dictionary
+        prop_dict = m1.GetPropsAsDict()
+        # Get the first SD tag/prop that contains the "ID" keyword
+        key_id = next((key for key in prop_dict if "ID" in key), None)
+
         return {
-            m.GetProp("Catalog ID"): m
-            for m in Chem.SDMolSupplier(file_path)
-            if m is not None
+            m.GetProp(key_id): m for m in Chem.SDMolSupplier(file_path) if m is not None
         }
 
     def csv_supplier_parser(self, file_path):

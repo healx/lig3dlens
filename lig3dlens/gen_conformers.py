@@ -68,8 +68,8 @@ def generate_conformers(
         return molecule
     else:
         logger.error(
-            "Failed to generate 3D confs for %s",
-            Chem.MolToSmiles(Chem.RemoveHs(molecule)),
+            "Failed to generate 3D confs for "
+            + Chem.MolToSmiles(Chem.RemoveHs(molecule)),
         )
 
 

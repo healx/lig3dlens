@@ -1,5 +1,6 @@
 # Ligand-based 3D Virtual Screening
 ## Lig3DLens
+Bill Tatsis, Dan Mason, Dan O'Donovan, Gio Cincilla, Azedine Zoufir and Nath Brown
 
 Lig3DLens performs the following tasks:
 1. Prepares a commercial compound library to be used for a VS campaign. This task
@@ -17,11 +18,13 @@ python -m pip install -r requirements.txt .
 ## Running a ligand-based 3D VS campaign
 
 1. Prepare a chemical library for a 3D VS campaign
+Note: In order to keep track of the library cmpds the input file should have a column containing the text "ID"
 ```
 lig3lens-prepare --in input_SD_file --filter physchem_yaml_file --out output_SD_file
 ```
 
 2. Generates 3D conformers for both the library and reference compounds and scores the library compounds using a 3D shape & electrostatics similarity function to the reference molecule
+Note: In order to keep track of the library cmpds the input file should have a column containing the text "ID"
 ```
 lig3dlens-align --ref input_reference_molecule_file --lib input_library_file_name --conf num_conformers --out output_SD_file
 ```

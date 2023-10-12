@@ -107,7 +107,7 @@ def _calculate_descriptors(
 )
 @click.option(
     "--out",
-    "output_name",
+    "output_file",
     type=str,
     required=True,
     help="Output SD file with Mols & ID columns",
