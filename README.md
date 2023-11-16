@@ -58,6 +58,8 @@ Tell MKL (used by NumPy) to use the GNU OpenMP runtime instead of the Intel Open
 ```
 export MKL_THREADING_LAYER=GNU
 ```
+The open source quantum chemistry package *Psi4* is required to for the QM calculation of the partial charges.
+More information about installing Psi4 in different CPU architectures (arm64 included) is provided in  [Psi4's](https://psicode.org/installs/v182/) website 
 
 ## Future improvements
 - Compound library preparation: 
