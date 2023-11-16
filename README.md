@@ -58,6 +58,7 @@ Tell MKL (used by NumPy) to use the GNU OpenMP runtime instead of the Intel Open
 ```
 export MKL_THREADING_LAYER=GNU
 ```
+Information about installing psi4: https://psicode.org/installs/v182/
 
 ## Future improvements
 - Compound library preparation: 
