@@ -221,14 +221,14 @@ def main(input_cmpd_lib, input_physchem_props, output_file):
                 physchem_properties["MAX_STEREO_CNTRS"],
             )
         )
-    ]
+    ].copy()
 
     logger.debug(
         f"There are {mols_lib_filt.shape[0]} cmpds after applying physchem filters"
     )
 
     # Adding now the ROMol objects
-    mols_lib_filt.loc[:, "ROMol"] = mols_lib_filt.smiles_sdt.apply(Chem.MolFromSmiles)
+    mols_lib_filt["ROMol"] = mols_lib_filt.smiles_sdt.apply(Chem.MolFromSmiles)
 
     # Get columns in dataframe that might contain IDs
     columns_with_id = mols_lib_filt.columns[
