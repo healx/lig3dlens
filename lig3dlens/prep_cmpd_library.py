@@ -79,6 +79,9 @@ def _calculate_descriptors(
 
     mol = Chem.MolFromSmiles(row[smiles_column])
 
+    if mol is None:
+        raise ValueError("Invalid SMILES:",  row[smiles_column])
+
     row["mw"] = dm.descriptors.mw(mol)
     row["hba"] = dm.descriptors.n_lipinski_hba(mol)
     row["hbd"] = dm.descriptors.n_lipinski_hbd(mol)
