@@ -38,6 +38,27 @@ lig3dlens-align --ref input_reference_molecule_file --lib input_library_file_nam
 lig3dlens-cluster –-in input_SD_file –-clusters num_clusters –-out output_file -–dim fingerprint_dimension -–fp_type fingerprint_type
 ```
 
+### Example
+To run `lig3dlens` with the data samples included in this repository;
+
+... preparing curated compounds
+```shell
+lig3dlens-prepare --in tests/test_data/Enamine_hts_collection_202303_first500_VS_results.sdf \
+    --filter lig3dlens/physchem_properties.yaml \
+    --out curated_compounds.sd
+```
+
+... generate 3D conformers
+```shell
+lig3dlens-align --ref input_reference_molecule_file --lib input_library_file_name --conf num_conformers --out output_SD_file
+```
+
+... clust
+```shell
+lig3dlens-cluster –-in input_SD_file –-clusters num_clusters –-out output_file -–dim fingerprint_dimension -–fp_type fingerprint_type
+```
+
+
 ## Development
 
 Use the Makefile commands to help tidy the codebase periodically. The following will reformat the code according to PEP8, and logically sort the imported modules:
@@ -59,14 +80,14 @@ Tell MKL (used by NumPy) to use the GNU OpenMP runtime instead of the Intel Open
 export MKL_THREADING_LAYER=GNU
 ```
 The open source quantum chemistry package *Psi4* is required to for the QM calculation of the partial charges.
-More information about installing Psi4 in different CPU architectures (arm64 included) is provided in  [Psi4's](https://psicode.org/installs/v182/) website 
+More information about installing Psi4 in different CPU architectures (arm64 included) is provided in  [Psi4's](https://psicode.org/installs/v182/) website
 
 ## Future improvements
-- Compound library preparation: 
+- Compound library preparation:
     * Apply a set of structural filters (for example [REOS](https://www.nature.com/articles/nrd1063) or [PAINS](https://pubs.acs.org/doi/10.1021/jm901137j)) - either remove or flag compounds.
     * Provide more autonomy to the drug designer when setting the physicochemical properties filters.
 
-- Compound selection: 
+- Compound selection:
     * Multi-parameter selection of compounds using a score function that includes the 3D score, 2D similarity to the reference compound, and the physchem properties. The aim is to get an even distribution between highly scored cmpds and other properties.
     * Select an optimal number of clusters instead of a predefined one (e.g. using Silhouette or affinity propagation methods). Alternatively, using another method for maximum score-diversity selection problem (e.g. Score Erosion algorithm).
     * Provide tools to analyse the chemical diversity of the final selection compound set.
