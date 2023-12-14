@@ -9,7 +9,7 @@ class TestCalculateDescriptors:
         sr = pd.Series({"test-col": "O=C([N-]c1cn+no1)C1CCCCC1"})
 
         with pytest.raises(ValueError):
-            desc = _calculate_descriptors(0, sr, smiles_column="test-col")
+            _calculate_descriptors(0, sr, smiles_column="test-col")
 
     def test_mesoionic_smiles(self):
         sr = pd.Series({"test-col": "O=[S](=O)([O-])[NH3+]"})
