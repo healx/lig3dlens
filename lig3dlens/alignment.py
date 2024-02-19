@@ -51,8 +51,7 @@ def run_alignment(
         output_file = Path(output_file)
         w = Chem.SDWriter(str(output_file))
 
-    num_processes = multiprocessing.cpu_count() - 2
-    with multiprocessing.Pool(num_processes) as pool:
+    with multiprocessing.Pool() as pool:
         try:
             for mol_id, mol in pool.imap_unordered(
                 map_conf_gen,
