@@ -24,10 +24,14 @@ class MolFileReader:
         ref_mol = next(Chem.SDMolSupplier(str(file_path)))
 
         # Check if reference molecule has a generated 3D conformation
-        if ref_mol.GetConformer().Is3D():
-            lig_3D_flag = True
-        else:
-            lig_3D_flag = False
+        try:
+            if ref_mol.GetConformer().Is3D():
+                lig_3D_flag = True
+        except ValueError as e:
+            if "Bad Conformer Id" in str(e):
+                lig_3D_flag = False
+            else:
+                raise
 
         return ref_mol, lig_3D_flag
 
@@ -44,10 +48,14 @@ class MolFileReader:
         m1 = next(sdsuppl, None)
         # Check if the first library compound has a 3D conformation
         # Infer the same for the rest in the compound library set!
-        if m1.GetConformer().Is3D():
-            lib_3D_flag = True
-        else:
-            lib_3D_flag = False
+        try:
+            if m1.GetConformer().Is3D():
+                lib_3D_flag = True
+        except ValueError as e:
+            if "Bad Conformer Id" in str(e):
+                lib_3D_flag = False
+            else:
+                raise
 
         # Copy SD tags/properties to a dictionary
         prop_dict = m1.GetPropsAsDict()
