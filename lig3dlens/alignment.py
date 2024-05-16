@@ -54,7 +54,7 @@ def align_n_score_mols(
     """
     for mol_id, mol in molecules:
         if mol is not None:
-            alignment_score = score_alignment(hmol, href_mol)
+            alignment_score = score_alignment(mol, href_mol)
             save_best_mol(
                 output_file, alignment_score.best_mol, mol_id, alignment_score
             )
