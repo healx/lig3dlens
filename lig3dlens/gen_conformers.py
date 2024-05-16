@@ -44,9 +44,9 @@ def generate_conformers(
 
     molecule.RemoveAllConformers()
 
-    # Hydrogens were made explicit in the parsing step - check parsers.py [line 69]
-    # if add_hydrogens:
-    #     molecule = Chem.AddHs(molecule)
+    # Make hydrogens explicit
+    if add_hydrogens:
+        molecule = Chem.AddHs(molecule)
 
     AllChem.EmbedMultipleConfs(
         molecule,
