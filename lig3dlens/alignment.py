@@ -88,7 +88,6 @@ def run_alignment(
             "Using the 3D conformations (of the reference and library cmpds) from the provided SD files"
         )
     else:
-        search_config.ref_mol.RemoveAllConformers()
         href_mol = generate_conformers(
             search_config.ref_mol, num_conformers=1, optimize=True
         )

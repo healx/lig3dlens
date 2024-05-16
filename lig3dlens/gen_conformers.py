@@ -17,7 +17,7 @@ def generate_conformers(
     molecule: Mol,
     num_conformers: int,
     prune_rms_threshold: float = 0.5,
-    add_hydrogens: bool = False,
+    add_hydrogens: bool = True,
     optimize: bool = False,
 ) -> Mol:
     """
