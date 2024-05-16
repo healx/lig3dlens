@@ -54,7 +54,8 @@ def align_n_score_mols(
     """
     for mol_id, mol in molecules:
         if mol is not None:
-            alignment_score = score_alignment(mol, href_mol)
+            hmol = Chem.AddHs(mol)
+            alignment_score = score_alignment(hmol, href_mol)
             save_best_mol(
                 output_file, alignment_score.best_mol, mol_id, alignment_score
             )
@@ -83,6 +84,9 @@ def run_alignment(
     """
     if search_config.lig_3D_flag and search_config.lib_3D_flag:
         href_mol = search_config.ref_mol
+        # Add hydrogens to the reference molecule
+        href_mol = Chem.AddHs(href_mol)
+
         logger.info(
             "Using the 3D conformations (of the reference and library cmpds) from the provided SD files"
         )
