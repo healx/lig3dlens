@@ -6,9 +6,12 @@ from rdkit import Chem
 SearchConfig = collections.namedtuple(
     "SearchConfig", ["ref_mol", "mols_to_align", "lig_3D_flag", "lib_3D_flag"]
 )
+# setting the lig_3D_flag and lib_3D_flag to False by default
+SearchConfig.__new__.__defaults__ = (None, None, False, False)
 
 
 class MolFileReader:
+
     def __init__(self, ref_mol_file_path: str, mols_to_align_file_path: str):
         self.ref_mol_file_path = ref_mol_file_path
         self.mols_to_align_file_path = mols_to_align_file_path
@@ -49,7 +52,7 @@ class MolFileReader:
         # Read the first molecule from the SD file
         m1 = next(sdsuppl, None)
         # Check if the first library compound has a 3D conformation
-        # Infer the same for the rest in the compound library set!
+        # Infer the same for the rest of the molecules in the same input file!
         try:
             if m1.GetConformer().Is3D():
                 lib_3D_flag = True
