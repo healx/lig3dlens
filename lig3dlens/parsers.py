@@ -95,6 +95,8 @@ class MolFileReader:
         align_file_type = self.determine_file_type(self.mols_to_align_file_path)
 
         if ref_file_type == "smiles":
+            # An ascii file cannot contain 3D coordinates
+            lig_3D_flag = False
             ref_mol = self.smiles_parser(self.ref_mol_file_path)
         elif ref_file_type == "sdf":
             ref_mol, lig_3D_flag = self.sdf_parser(self.ref_mol_file_path)
@@ -104,12 +106,14 @@ class MolFileReader:
             )
 
         if align_file_type == "smiles":
+            # An ascii file cannot contain 3D coordinates
             mols_to_align = self.smiles_supplier_parser(self.mols_to_align_file_path)
         elif align_file_type == "sdf":
             mols_to_align, lib_3D_flag = self.sdf_supplier_parser(
                 self.mols_to_align_file_path
             )
         elif align_file_type == "csv":
+            # An ascii file cannot contain 3D coordinates
             mols_to_align = self.csv_supplier_parser(self.mols_to_align_file_path)
         else:
             raise ValueError("Only `csv`, `.smi` and `.sdf` files are supported.")
