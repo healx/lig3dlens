@@ -17,7 +17,7 @@ def generate_conformers(
     molecule: Mol,
     num_conformers: int,
     prune_rms_threshold: float = 0.5,
-    add_hydrogens: bool = True,
+    add_hydrogens: bool = False,
     optimize: bool = False,
 ) -> Mol:
     """
@@ -44,8 +44,9 @@ def generate_conformers(
 
     molecule.RemoveAllConformers()
 
-    if add_hydrogens:
-        molecule = Chem.AddHs(molecule)
+    # Hydrogens were made explicit in the parsing step - check parsers.py [line 69]
+    # if add_hydrogens:
+    #     molecule = Chem.AddHs(molecule)
 
     AllChem.EmbedMultipleConfs(
         molecule,

@@ -27,6 +27,8 @@ class MolFileReader:
         try:
             if ref_mol.GetConformer().Is3D():
                 lig_3D_flag = True
+                # Add hydrogens to the reference molecule
+                ref_mol = Chem.AddHs(ref_mol)
         except ValueError as e:
             if "Bad Conformer Id" in str(e):
                 lig_3D_flag = False
@@ -62,8 +64,11 @@ class MolFileReader:
         # Get the first SD tag/prop that contains the "ID" keyword
         key_id = next((key for key in prop_dict if "ID" in key), None)
 
+        # Make hydrogens explicit to all the library compounds
         return {
-            m.GetProp(key_id): m for m in Chem.SDMolSupplier(file_path) if m is not None
+            m.GetProp(key_id): Chem.AddHs(m)
+            for m in Chem.SDMolSupplier(file_path)
+            if m is not None
         }, lib_3D_flag
 
     def csv_supplier_parser(self, file_path):
