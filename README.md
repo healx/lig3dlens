@@ -36,8 +36,8 @@ lig3dlens-align --ref input_reference_molecule_file --lib input_library_file_nam
 > **New feature** 
 > Lig3DLens can work with input files that contain the 3D conformations for the reference compound and/or the compound library
 
-``
-lig3dlens-align --ref input_reference_molecule_file --lib input_library_file_name  --out output_SD_file
+```
+lig3dlens-align --ref input_3D-reference_molecule_file --lib input_3D-library_file_name  --out output_SD_file
 ```
 
 3. Clusters the highest scoring molecules and selects a representative (diverse) set of compounds. The user can input the number of clusters (`num_clusters`), the fingerprint type (`fingerprint_type`) and its dimension (`fingerprint_dimension`) used for the clustering.
