@@ -33,27 +33,34 @@ lig3lens-prepare --in input_SD_file --filter physchem_yaml_file --out output_SD_
 lig3dlens-align --ref input_reference_molecule_file --lib input_library_file_name --conf num_conformers --out output_SD_file
 ```
 
+> **New feature** 
+> Lig3DLens can work with input files that contain the 3D conformations for the reference compound and/or the compound library
+
+``
+lig3dlens-align --ref input_reference_molecule_file --lib input_library_file_name  --out output_SD_file
+```
+
 3. Clusters the highest scoring molecules and selects a representative (diverse) set of compounds. The user can input the number of clusters (`num_clusters`), the fingerprint type (`fingerprint_type`) and its dimension (`fingerprint_dimension`) used for the clustering.
 ```
 lig3dlens-cluster –-in input_SD_file –-clusters num_clusters –-out output_file -–dim fingerprint_dimension -–fp_type fingerprint_type
 ```
 
 ### Example
-To run `lig3dlens` with the data samples included in this repository;
+To run `lig3dlens` with the input files (reference molecule and compound library) included in this repository;
 
-... preparing curated compounds
+... preparing the compound library for virtual screening 
 ```shell
 lig3dlens-prepare --in tests/test_data/Enamine_hts_collection_202303_first500_VS_results.sdf \
     --filter lig3dlens/physchem_properties.yaml \
     --out curated_compounds.sd
 ```
 
-... generate 3D conformers
+... generate the 3D conformers for both reference and library compounds, score the compounds in the library set using a 3D shape and electrostatics similarity 
 ```shell
 lig3dlens-align --ref input_reference_molecule_file --lib input_library_file_name --conf num_conformers --out output_SD_file
 ```
 
-... clust
+... cluster the results from the 3D virtual screening campaing 
 ```shell
 lig3dlens-cluster –-in input_SD_file –-clusters num_clusters –-out output_file -–dim fingerprint_dimension -–fp_type fingerprint_type
 ```
