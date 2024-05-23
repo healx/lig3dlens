@@ -24,7 +24,15 @@ class MolFileReader:
         return ref_mol
 
     def sdf_parser(self, file_path):
-        ref_mol = next(Chem.SDMolSupplier(str(file_path)))
+        # Read the first molecule from the SDF file
+        supplier = Chem.SDMolSupplier(str(file_path))
+        ref_mol = next(supplier, None)
+
+        if ref_mol is None:
+            raise ValueError("No valid molecule(s) in SDF file")
+
+        # Initialize the 3D flag
+        lig_3D_flag = False
 
         # Check if reference molecule has a generated 3D conformation
         try:
