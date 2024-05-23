@@ -1,6 +1,6 @@
 import multiprocessing
 from pathlib import Path
-from typing import Optional, Dict, Generator, Tuple
+from typing import Dict, Generator, Optional, Tuple
 
 from loguru import logger
 from rdkit import Chem
