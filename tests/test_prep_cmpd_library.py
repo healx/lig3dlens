@@ -8,7 +8,7 @@ class TestCalculateDescriptors:
     def test_invalid_smiles_raises_value_error(self):
         sr = pd.Series({"test-col": "O=C([N-]c1cn+no1)C1CCCCC1"})
 
-        with pytest.raises(ValueError):
+        with pytest.raises(ValueError, match="Invalid SMILES"):
             _calculate_descriptors(0, sr, smiles_column="test-col")
 
     def test_mesoionic_smiles(self):

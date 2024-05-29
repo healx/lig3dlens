@@ -88,8 +88,8 @@ def test_smiles_parser_reads_smiles(smiles_path):
 def test_sdf_parser_reads_sdf(sdf_path):
     parser = MolFileReader("", "")
     sdf = parser.sdf_parser(sdf_path)
-
+    
     assert (
-        "".join(map(lambda atom: atom.GetSymbol(), sdf.GetAtoms()))
-        == "C[n]1c(C(N(C)C(N2C)=O)=O)c2nc1"
+        "".join(map(lambda atom: atom.GetSymbol(), sdf[0].GetAtoms()))
+        == "CNCNCCCONCONCCHHHHHHHHHH"
     )
