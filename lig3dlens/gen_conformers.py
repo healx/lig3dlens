@@ -44,6 +44,7 @@ def generate_conformers(
 
     molecule.RemoveAllConformers()
 
+    # Make hydrogens explicit
     if add_hydrogens:
         molecule = Chem.AddHs(molecule)
 

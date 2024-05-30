@@ -4,6 +4,7 @@ __pycache__
 # IDE files
 .idea
 .python-version
+.DS_Store
 
 # test artefacts
 *.tox
