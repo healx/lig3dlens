@@ -1,6 +1,4 @@
-rdkit
 # pytorch -- causing difficulties, revisit
-numpy
 scikit-learn
 datamol
 molfeat
