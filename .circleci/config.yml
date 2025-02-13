@@ -5,6 +5,18 @@ workflows:
     jobs:
       - build
 
+  weekly:
+    jobs:
+      - build
+    triggers:
+      - schedule:
+          # run at 00:30 every Sunday
+          cron: "30 0 * * 0"
+          filters:
+            branches:
+              only:
+                - main
+
 jobs:
   build:
     docker:
