@@ -2,13 +2,16 @@ from setuptools import find_packages, setup
 
 setup(
     name="lig3dlens",
-    version="0.0.2",
+    version="0.0.3",
     url="https://github.com/healx/lig3dlens.git",
     description="Open source ligand-based 3D VS toolbox",
     packages=find_packages(include=["lig3dlens", "lig3dlens.*"]),
     install_requires=[
-        "pandas==2.1",  # https://github.com/healx/lig3dlens/issues/19
-        #'rdkit',
+        # pin RDKit to reduce breakages
+        "rdkit~=2024.9",
+        # undocumented RDKit pins
+        "pandas~=1.5",
+        "numpy~=1.21",
     ],
     entry_points={
         "console_scripts": [

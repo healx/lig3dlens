@@ -1,5 +1,5 @@
-black
-ruff
-isort
-pytest
-pytest-cov
+black~=25.1
+ruff~=0.9
+isort~=6.0
+pytest~=8.3
+pytest-cov~=6.0
