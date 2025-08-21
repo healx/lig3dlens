@@ -97,6 +97,71 @@ def _calculate_descriptors(
     return row
 
 
+def _apply_physchem_filters(
+    mols_lib_descs: pd.DataFrame, physchem_properties: dict
+) -> pd.DataFrame:
+    """
+    Apply physicochemical property filters to compound library
+
+    Parameters
+    ----------
+    mols_lib_descs : pd.DataFrame
+        DataFrame with calculated descriptors
+    physchem_properties : dict
+        Dictionary containing min/max filter values
+
+    Returns
+    -------
+    pd.DataFrame
+        Filtered DataFrame
+    """
+    return mols_lib_descs[
+        (
+            mols_lib_descs["mw"].between(
+                physchem_properties["MIN_MOLWT"], physchem_properties["MAX_MOLWT"]
+            )
+        )
+        & (
+            mols_lib_descs["clogp"].between(
+                physchem_properties["MIN_CLOGP"], physchem_properties["MAX_CLOGP"]
+            )
+        )
+        & (
+            mols_lib_descs["hbd"].between(
+                physchem_properties["MIN_HBD"], physchem_properties["MAX_HBD"]
+            )
+        )
+        & (
+            mols_lib_descs["hba"].between(
+                physchem_properties["MIN_HBA"], physchem_properties["MAX_HBA"]
+            )
+        )
+        & (
+            mols_lib_descs["tpsa"].between(
+                physchem_properties["MIN_TPSA"], physchem_properties["MAX_TPSA"]
+            )
+        )
+        & (
+            mols_lib_descs["rot_bonds"].between(
+                physchem_properties["MIN_ROT_BONDS"],
+                physchem_properties["MAX_ROT_BONDS"],
+            )
+        )
+        & (
+            mols_lib_descs["arom_rings"].between(
+                physchem_properties["MIN_AROM_RINGS"],
+                physchem_properties["MAX_AROM_RINGS"],
+            )
+        )
+        & (
+            mols_lib_descs["stereo_cntrs"].between(
+                physchem_properties["MIN_STEREO_CNTRS"],
+                physchem_properties["MAX_STEREO_CNTRS"],
+            )
+        )
+    ].copy()
+
+
 @click.command(name="prepare")
 @click.option(
     "--in", "input_cmpd_lib", type=str, required=True, help="Input compound library"
@@ -133,7 +198,9 @@ def main(input_cmpd_lib, input_physchem_props, output_file, no_filter):
             "Must provide either --filter <yaml_file> or --no-filter"
         )
     if no_filter and input_physchem_props:
-        logger.warning("Both --no-filter and --filter provided. Using --no-filter.")
+        raise click.ClickException(
+            "Cannot provide both --no-filter and --filter options. Choose one."
+        )
 
     logger.info(f"Loading cmpds from {input_cmpd_lib} to a Pandas dataframe")
 
@@ -205,51 +272,7 @@ def main(input_cmpd_lib, input_physchem_props, output_file, no_filter):
         mols_lib_filt = mols_lib_descs.copy()
     else:
         logger.info("Applying physicochemical property filters")
-        mols_lib_filt = mols_lib_descs[
-            (
-                mols_lib_descs["mw"].between(
-                    physchem_properties["MIN_MOLWT"], physchem_properties["MAX_MOLWT"]
-                )
-            )
-            & (
-                mols_lib_descs["clogp"].between(
-                    physchem_properties["MIN_CLOGP"], physchem_properties["MAX_CLOGP"]
-                )
-            )
-            & (
-                mols_lib_descs["hbd"].between(
-                    physchem_properties["MIN_HBD"], physchem_properties["MAX_HBD"]
-                )
-            )
-            & (
-                mols_lib_descs["hba"].between(
-                    physchem_properties["MIN_HBA"], physchem_properties["MAX_HBA"]
-                )
-            )
-            & (
-                mols_lib_descs["tpsa"].between(
-                    physchem_properties["MIN_TPSA"], physchem_properties["MAX_TPSA"]
-                )
-            )
-            & (
-                mols_lib_descs["rot_bonds"].between(
-                    physchem_properties["MIN_ROT_BONDS"],
-                    physchem_properties["MAX_ROT_BONDS"],
-                )
-            )
-            & (
-                mols_lib_descs["arom_rings"].between(
-                    physchem_properties["MIN_AROM_RINGS"],
-                    physchem_properties["MAX_AROM_RINGS"],
-                )
-            )
-            & (
-                mols_lib_descs["stereo_cntrs"].between(
-                    physchem_properties["MIN_STEREO_CNTRS"],
-                    physchem_properties["MAX_STEREO_CNTRS"],
-                )
-            )
-        ].copy()
+        mols_lib_filt = _apply_physchem_filters(mols_lib_descs, physchem_properties)
 
     logger.debug(f"There are {mols_lib_filt.shape[0]} cmpds after filtering step")
 

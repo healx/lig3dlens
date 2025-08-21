@@ -41,9 +41,8 @@ class TestPrepCmdLibraryCLI:
     def runner(self):
         return CliRunner()
 
-    def test_no_options_provided_raises_error(self):
+    def test_no_options_provided_raises_error(self, runner):
         """Test that missing both --filter and --no-filter raises error"""
-        runner = CliRunner()
         result = runner.invoke(main, ["--in", "dummy.sdf", "--out", "dummy_out.sdf"])
 
         # Should fail with specific error message
@@ -52,9 +51,8 @@ class TestPrepCmdLibraryCLI:
             "Must provide either --filter <yaml_file> or --no-filter" in result.output
         )
 
-    def test_help_shows_new_options(self):
+    def test_help_shows_new_options(self, runner):
         """Test that help text shows both filter options"""
-        runner = CliRunner()
         result = runner.invoke(main, ["--help"])
 
         assert result.exit_code == 0
@@ -62,9 +60,8 @@ class TestPrepCmdLibraryCLI:
         assert "--no-filter" in result.output
         assert "Skip physicochemical property filtering entirely" in result.output
 
-    def test_no_filter_flag_validation(self):
+    def test_no_filter_flag_validation(self, runner):
         """Test that --no-filter flag is properly recognized"""
-        runner = CliRunner()
         # This will fail due to missing input file, but should pass validation
         result = runner.invoke(
             main, ["--in", "nonexistent.sdf", "--no-filter", "--out", "dummy_out.sdf"]
@@ -74,3 +71,22 @@ class TestPrepCmdLibraryCLI:
         assert result.exit_code == 1
         # Should not see the validation error message
         assert "Must provide either --filter" not in result.output
+
+    def test_both_options_provided_raises_error(self, runner):
+        """Test that providing both --filter and --no-filter raises error"""
+        result = runner.invoke(
+            main,
+            [
+                "--in",
+                "dummy.sdf",
+                "--filter",
+                "dummy.yaml",
+                "--no-filter",
+                "--out",
+                "dummy_out.sdf",
+            ],
+        )
+
+        # Should fail with specific error message
+        assert result.exit_code == 1
+        assert "Cannot provide both --no-filter and --filter options" in result.output
