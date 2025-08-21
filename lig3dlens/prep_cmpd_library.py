@@ -105,8 +105,13 @@ def _calculate_descriptors(
     "--filter",
     "input_physchem_props",
     type=str,
-    required=True,
-    help="yaml file with physicochemical properties filters",
+    help="YAML file with physicochemical properties filters",
+)
+@click.option(
+    "--no-filter",
+    "no_filter",
+    is_flag=True,
+    help="Skip physicochemical property filtering entirely",
 )
 @click.option(
     "--out",
@@ -115,12 +120,20 @@ def _calculate_descriptors(
     required=True,
     help="Output SD file with Mols & ID columns",
 )
-def main(input_cmpd_lib, input_physchem_props, output_file):
+def main(input_cmpd_lib, input_physchem_props, output_file, no_filter):
     logger.info(
         "Initialising the compound library preparation workflow",
         colorize=True,
         format="<green>{time}</green> <level>{message}</level>",
     )
+
+    # Validate filter options
+    if not no_filter and not input_physchem_props:
+        raise click.ClickException(
+            "Must provide either --filter <yaml_file> or --no-filter"
+        )
+    if no_filter and input_physchem_props:
+        logger.warning("Both --no-filter and --filter provided. Using --no-filter.")
 
     logger.info(f"Loading cmpds from {input_cmpd_lib} to a Pandas dataframe")
 
@@ -153,82 +166,92 @@ def main(input_cmpd_lib, input_physchem_props, output_file):
     mols_lib = None
     gc.collect()
 
-    logger.info(f"Parsing physchem filters from {input_physchem_props}")
-    with open(input_physchem_props) as f:
-        physchem_properties = yaml.safe_load(f)
+    if not no_filter:
+        logger.info(f"Parsing physchem filters from {input_physchem_props}")
+        with open(input_physchem_props) as f:
+            physchem_properties = yaml.safe_load(f)
+    else:
+        logger.info("Skipping physicochemical property filtering")
 
     # -----------------------------------------------------------------
     # Calculating the physicochemical properties of the compounds
     # -----------------------------------------------------------------
-    logger.info("Calculating physchem properties for the library cmpds")
-    mols_lib_descs = dm.parallelized(
-        _calculate_descriptors,
-        mols_lib_sdt.iterrows(),
-        arg_type="args",
-        progress=True,
-        total=len(mols_lib_sdt),
-        tqdm_kwargs={"desc": "Calculating physchem properties"},
-    )
+    if no_filter:
+        # Skip descriptor calculation when not filtering
+        mols_lib_descs = mols_lib_sdt
+    else:
+        logger.info("Calculating physchem properties for the library cmpds")
+        mols_lib_descs = dm.parallelized(
+            _calculate_descriptors,
+            mols_lib_sdt.iterrows(),
+            arg_type="args",
+            progress=True,
+            total=len(mols_lib_sdt),
+            tqdm_kwargs={"desc": "Calculating physchem properties"},
+        )
 
-    mols_lib_descs = pd.DataFrame(mols_lib_descs)
+        mols_lib_descs = pd.DataFrame(mols_lib_descs)
 
-    # Free up memory by deleting the previous dataframe
-    mols_lib_sdt = None
-    gc.collect()
+        # Free up memory by deleting the previous dataframe
+        mols_lib_sdt = None
+        gc.collect()
 
     # -----------------------------------------------------------------
     # Filtering cmpds using physicochemical properties criteria
     # -----------------------------------------------------------------
 
-    mols_lib_filt = mols_lib_descs[
-        (
-            mols_lib_descs["mw"].between(
-                physchem_properties["MIN_MOLWT"], physchem_properties["MAX_MOLWT"]
+    if no_filter:
+        logger.info("Bypassing physicochemical property filters")
+        mols_lib_filt = mols_lib_descs.copy()
+    else:
+        logger.info("Applying physicochemical property filters")
+        mols_lib_filt = mols_lib_descs[
+            (
+                mols_lib_descs["mw"].between(
+                    physchem_properties["MIN_MOLWT"], physchem_properties["MAX_MOLWT"]
+                )
             )
-        )
-        & (
-            mols_lib_descs["clogp"].between(
-                physchem_properties["MIN_CLOGP"], physchem_properties["MAX_CLOGP"]
+            & (
+                mols_lib_descs["clogp"].between(
+                    physchem_properties["MIN_CLOGP"], physchem_properties["MAX_CLOGP"]
+                )
             )
-        )
-        & (
-            mols_lib_descs["hbd"].between(
-                physchem_properties["MIN_HBD"], physchem_properties["MAX_HBD"]
+            & (
+                mols_lib_descs["hbd"].between(
+                    physchem_properties["MIN_HBD"], physchem_properties["MAX_HBD"]
+                )
             )
-        )
-        & (
-            mols_lib_descs["hba"].between(
-                physchem_properties["MIN_HBA"], physchem_properties["MAX_HBA"]
+            & (
+                mols_lib_descs["hba"].between(
+                    physchem_properties["MIN_HBA"], physchem_properties["MAX_HBA"]
+                )
             )
-        )
-        & (
-            mols_lib_descs["tpsa"].between(
-                physchem_properties["MIN_TPSA"], physchem_properties["MAX_TPSA"]
+            & (
+                mols_lib_descs["tpsa"].between(
+                    physchem_properties["MIN_TPSA"], physchem_properties["MAX_TPSA"]
+                )
             )
-        )
-        & (
-            mols_lib_descs["rot_bonds"].between(
-                physchem_properties["MIN_ROT_BONDS"],
-                physchem_properties["MAX_ROT_BONDS"],
+            & (
+                mols_lib_descs["rot_bonds"].between(
+                    physchem_properties["MIN_ROT_BONDS"],
+                    physchem_properties["MAX_ROT_BONDS"],
+                )
             )
-        )
-        & (
-            mols_lib_descs["arom_rings"].between(
-                physchem_properties["MIN_AROM_RINGS"],
-                physchem_properties["MAX_AROM_RINGS"],
+            & (
+                mols_lib_descs["arom_rings"].between(
+                    physchem_properties["MIN_AROM_RINGS"],
+                    physchem_properties["MAX_AROM_RINGS"],
+                )
             )
-        )
-        & (
-            mols_lib_descs["stereo_cntrs"].between(
-                physchem_properties["MIN_STEREO_CNTRS"],
-                physchem_properties["MAX_STEREO_CNTRS"],
+            & (
+                mols_lib_descs["stereo_cntrs"].between(
+                    physchem_properties["MIN_STEREO_CNTRS"],
+                    physchem_properties["MAX_STEREO_CNTRS"],
+                )
             )
-        )
-    ].copy()
+        ].copy()
 
-    logger.debug(
-        f"There are {mols_lib_filt.shape[0]} cmpds after applying physchem filters"
-    )
+    logger.debug(f"There are {mols_lib_filt.shape[0]} cmpds after filtering step")
 
     # Adding now the ROMol objects
     mols_lib_filt["ROMol"] = mols_lib_filt.smiles_sdt.apply(Chem.MolFromSmiles)
