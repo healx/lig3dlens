@@ -34,26 +34,52 @@ def _preprocess(i: int, row: pd.Series, mol_column: str = "ROMol") -> pd.Series:
 
     Returns
     -------
-    row
-        a pd.series with the standardised smiles
+    row or None
+        a pd.series with the standardised smiles, or None if processing fails
     """
 
-    with dm.without_rdkit_log():
-        mol = dm.fix_mol(row[mol_column])
-        mol = dm.sanitize_mol(mol, sanifix=True, charge_neutral=False)
-        mol = dm.standardize_mol(
-            mol,
-            disconnect_metals=True,
-            normalize=True,
-            reionize=True,
-            uncharge=False,
-            stereo=True,
-        )
-        mol = dm.keep_largest_fragment(mol)
+    try:
+        with dm.without_rdkit_log():
+            mol = dm.fix_mol(row[mol_column])
+            if mol is None:
+                logger.warning(f"Could not fix molecule at row {i}")
+                return None
 
-        row["smiles_sdt"] = dm.standardize_smiles(dm.to_smiles(mol))
+            mol = dm.sanitize_mol(mol, sanifix=True, charge_neutral=False)
+            if mol is None:
+                logger.warning(f"Could not sanitize molecule at row {i}")
+                return None
 
-        return row
+            mol = dm.standardize_mol(
+                mol,
+                disconnect_metals=True,
+                normalize=True,
+                reionize=True,
+                uncharge=False,
+                stereo=True,
+            )
+            if mol is None:
+                logger.warning(f"Could not standardize molecule at row {i}")
+                return None
+
+            mol = dm.keep_largest_fragment(mol)
+            if mol is None:
+                logger.warning(
+                    f"Could not extract largest fragment for molecule at row {i}"
+                )
+                return None
+
+            smiles = dm.to_smiles(mol)
+            if not smiles:
+                logger.warning(f"Could not generate SMILES for molecule at row {i}")
+                return None
+
+            row["smiles_sdt"] = dm.standardize_smiles(smiles)
+            return row
+
+    except Exception as e:
+        logger.warning(f"Error processing molecule at row {i}: {e}")
+        return None
 
 
 def _calculate_descriptors(
@@ -73,28 +99,34 @@ def _calculate_descriptors(
 
     Returns
     -------
-    row
-        a pd.series with the standardised smiles
+    row or None
+        a pd.series with the standardised smiles and descriptors, or None if invalid SMILES
     """
 
     mol = Chem.MolFromSmiles(row[smiles_column])
 
     if mol is None:
-        raise ValueError(f"Invalid SMILES: {row[smiles_column]}")
+        logger.warning(f"Skipping invalid SMILES: {row[smiles_column]}")
+        return None
 
-    row["mw"] = dm.descriptors.mw(mol)
-    row["hba"] = dm.descriptors.n_lipinski_hba(mol)
-    row["hbd"] = dm.descriptors.n_lipinski_hbd(mol)
-    row["rot_bonds"] = dm.descriptors.n_rotatable_bonds(mol)
-    row["arom_rings"] = dm.descriptors.n_aromatic_rings(mol)
-    row["fsp3"] = dm.descriptors.fsp3(mol)
-    row["tpsa"] = dm.descriptors.tpsa(mol)
-    row["clogp"] = dm.descriptors.clogp(mol)
-    row["qed"] = dm.descriptors.qed(mol)
-    row["heavy_atms"] = dm.descriptors.n_heavy_atoms(mol)
-    row["stereo_cntrs"] = dm.descriptors.n_stereo_centers(mol)
-
-    return row
+    try:
+        row["mw"] = dm.descriptors.mw(mol)
+        row["hba"] = dm.descriptors.n_lipinski_hba(mol)
+        row["hbd"] = dm.descriptors.n_lipinski_hbd(mol)
+        row["rot_bonds"] = dm.descriptors.n_rotatable_bonds(mol)
+        row["arom_rings"] = dm.descriptors.n_aromatic_rings(mol)
+        row["fsp3"] = dm.descriptors.fsp3(mol)
+        row["tpsa"] = dm.descriptors.tpsa(mol)
+        row["clogp"] = dm.descriptors.clogp(mol)
+        row["qed"] = dm.descriptors.qed(mol)
+        row["heavy_atms"] = dm.descriptors.n_heavy_atoms(mol)
+        row["stereo_cntrs"] = dm.descriptors.n_stereo_centers(mol)
+        return row
+    except Exception as e:
+        logger.warning(
+            f"Error calculating descriptors for SMILES {row[smiles_column]}: {e}"
+        )
+        return None
 
 
 @click.command(name="prepare")
@@ -141,13 +173,25 @@ def main(input_cmpd_lib, input_physchem_props, output_file):
         tqdm_kwargs={"desc": "Standardising compound library"},
     )
 
-    mols_lib_sdt = pd.DataFrame([r for r in mols_lib_sdt if r is not None])
+    # Filter out None results (molecules that failed processing)
+    mols_lib_sdt = [r for r in mols_lib_sdt if r is not None]
+    logger.debug(
+        f"Successfully standardized {len(mols_lib_sdt)} out of {len(mols_lib)} compounds"
+    )
 
-    # Drop the initial 'ROMol' column to reduce the allocated memory
-    mols_lib_sdt.drop(columns=["ROMol"], inplace=True)
+    mols_lib_sdt = pd.DataFrame(mols_lib_sdt)
+
+    # Drop the initial 'ROMol' column to reduce the allocated memory (if it exists)
+    if "ROMol" in mols_lib_sdt.columns:
+        mols_lib_sdt.drop(columns=["ROMol"], inplace=True)
     mols_lib_sdt.reset_index(inplace=True, drop=True)
 
     logger.debug(f"There are {mols_lib_sdt.shape[0]} cmpds after standardization")
+
+    # Check if we have any compounds left after standardization
+    if mols_lib_sdt.empty:
+        logger.error("No compounds survived standardization. Check input file quality.")
+        raise click.ClickException("No valid compounds found after standardization")
 
     # Free up memory by deleting the previous dataframe
     mols_lib = None
@@ -169,6 +213,18 @@ def main(input_cmpd_lib, input_physchem_props, output_file):
         total=len(mols_lib_sdt),
         tqdm_kwargs={"desc": "Calculating physchem properties"},
     )
+
+    # Filter out None results (invalid SMILES that were skipped)
+    mols_lib_descs = [r for r in mols_lib_descs if r is not None]
+    logger.debug(
+        f"Successfully calculated descriptors for {len(mols_lib_descs)} compounds"
+    )
+
+    if not mols_lib_descs:
+        logger.error(
+            "No compounds had valid descriptors calculated. Check SMILES quality."
+        )
+        raise click.ClickException("No valid descriptors could be calculated")
 
     mols_lib_descs = pd.DataFrame(mols_lib_descs)
 
