@@ -1,4 +1,5 @@
 tidy:
+	ruff check --fix lig3dlens tests setup.py
 	isort lig3dlens tests setup.py --profile black
 	black lig3dlens tests setup.py
 
