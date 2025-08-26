@@ -129,114 +129,25 @@ def _calculate_descriptors(
         return None
 
 
-@click.command(name="prepare")
-@click.option(
-    "--in", "input_cmpd_lib", type=str, required=True, help="Input compound library"
-)
-@click.option(
-    "--filter",
-    "input_physchem_props",
-    type=str,
-    required=True,
-    help="yaml file with physicochemical properties filters",
-)
-@click.option(
-    "--out",
-    "output_file",
-    type=str,
-    required=True,
-    help="Output SD file with Mols & ID columns",
-)
-def main(input_cmpd_lib, input_physchem_props, output_file):
-    logger.info(
-        "Initialising the compound library preparation workflow",
-        colorize=True,
-        format="<green>{time}</green> <level>{message}</level>",
-    )
+def _apply_physchem_filters(
+    mols_lib_descs: pd.DataFrame, physchem_properties: dict
+) -> pd.DataFrame:
+    """
+    Apply physicochemical property filters to compound library
 
-    logger.info(f"Loading cmpds from {input_cmpd_lib} to a Pandas dataframe")
+    Parameters
+    ----------
+    mols_lib_descs : pd.DataFrame
+        DataFrame with calculated descriptors
+    physchem_properties : dict
+        Dictionary containing min/max filter values
 
-    # Load input file to a pandas df
-    mols_lib = dm.read_sdf(input_cmpd_lib, as_df=True, mol_column="ROMol")
-    logger.debug(f"There are {mols_lib.shape[0]} cmpds in {input_cmpd_lib}")
-
-    # -----------------------------------------------------------------
-    # Standardising/Sanitising compound library                      #
-    # -----------------------------------------------------------------
-    logger.info("Standardising compound library")
-    mols_lib_sdt = dm.parallelized(
-        _preprocess,
-        mols_lib.iterrows(),
-        arg_type="args",
-        progress=True,
-        total=len(mols_lib),
-        tqdm_kwargs={"desc": "Standardising compound library"},
-    )
-
-    # Filter out None results (molecules that failed processing)
-    mols_lib_sdt = [r for r in mols_lib_sdt if r is not None]
-    logger.debug(
-        f"Successfully standardized {len(mols_lib_sdt)} out of {len(mols_lib)} compounds"
-    )
-
-    mols_lib_sdt = pd.DataFrame(mols_lib_sdt)
-
-    # Drop the initial 'ROMol' column to reduce the allocated memory (if it exists)
-    if "ROMol" in mols_lib_sdt.columns:
-        mols_lib_sdt.drop(columns=["ROMol"], inplace=True)
-    mols_lib_sdt.reset_index(inplace=True, drop=True)
-
-    logger.debug(f"There are {mols_lib_sdt.shape[0]} cmpds after standardization")
-
-    # Check if we have any compounds left after standardization
-    if mols_lib_sdt.empty:
-        logger.error("No compounds survived standardization. Check input file quality.")
-        raise click.ClickException("No valid compounds found after standardization")
-
-    # Free up memory by deleting the previous dataframe
-    mols_lib = None
-    gc.collect()
-
-    logger.info(f"Parsing physchem filters from {input_physchem_props}")
-    with open(input_physchem_props) as f:
-        physchem_properties = yaml.safe_load(f)
-
-    # -----------------------------------------------------------------
-    # Calculating the physicochemical properties of the compounds
-    # -----------------------------------------------------------------
-    logger.info("Calculating physchem properties for the library cmpds")
-    mols_lib_descs = dm.parallelized(
-        _calculate_descriptors,
-        mols_lib_sdt.iterrows(),
-        arg_type="args",
-        progress=True,
-        total=len(mols_lib_sdt),
-        tqdm_kwargs={"desc": "Calculating physchem properties"},
-    )
-
-    # Filter out None results (invalid SMILES that were skipped)
-    mols_lib_descs = [r for r in mols_lib_descs if r is not None]
-    logger.debug(
-        f"Successfully calculated descriptors for {len(mols_lib_descs)} compounds"
-    )
-
-    if not mols_lib_descs:
-        logger.error(
-            "No compounds had valid descriptors calculated. Check SMILES quality."
-        )
-        raise click.ClickException("No valid descriptors could be calculated")
-
-    mols_lib_descs = pd.DataFrame(mols_lib_descs)
-
-    # Free up memory by deleting the previous dataframe
-    mols_lib_sdt = None
-    gc.collect()
-
-    # -----------------------------------------------------------------
-    # Filtering cmpds using physicochemical properties criteria
-    # -----------------------------------------------------------------
-
-    mols_lib_filt = mols_lib_descs[
+    Returns
+    -------
+    pd.DataFrame
+        Filtered DataFrame
+    """
+    return mols_lib_descs[
         (
             mols_lib_descs["mw"].between(
                 physchem_properties["MIN_MOLWT"], physchem_properties["MAX_MOLWT"]
@@ -282,9 +193,120 @@ def main(input_cmpd_lib, input_physchem_props, output_file):
         )
     ].copy()
 
-    logger.debug(
-        f"There are {mols_lib_filt.shape[0]} cmpds after applying physchem filters"
+
+@click.command(name="prepare")
+@click.option(
+    "--in", "input_cmpd_lib", type=str, required=True, help="Input compound library"
+)
+@click.option(
+    "--filter",
+    "input_physchem_props",
+    type=str,
+    help="YAML file with physicochemical properties filters",
+)
+@click.option(
+    "--no-filter",
+    "no_filter",
+    is_flag=True,
+    help="Skip physicochemical property filtering entirely",
+)
+@click.option(
+    "--out",
+    "output_file",
+    type=str,
+    required=True,
+    help="Output SD file with Mols & ID columns",
+)
+def main(input_cmpd_lib, input_physchem_props, output_file, no_filter):
+    logger.info(
+        "Initialising the compound library preparation workflow",
+        colorize=True,
+        format="<green>{time}</green> <level>{message}</level>",
     )
+
+    # Validate filter options
+    if not no_filter and not input_physchem_props:
+        raise click.ClickException(
+            "Must provide either --filter <yaml_file> or --no-filter"
+        )
+    if no_filter and input_physchem_props:
+        raise click.ClickException(
+            "Cannot provide both --no-filter and --filter options. Choose one."
+        )
+
+    logger.info(f"Loading cmpds from {input_cmpd_lib} to a Pandas dataframe")
+
+    # Load input file to a pandas df
+    mols_lib = dm.read_sdf(input_cmpd_lib, as_df=True, mol_column="ROMol")
+    logger.debug(f"There are {mols_lib.shape[0]} cmpds in {input_cmpd_lib}")
+
+    # -----------------------------------------------------------------
+    # Standardising/Sanitising compound library                      #
+    # -----------------------------------------------------------------
+    logger.info("Standardising compound library")
+    mols_lib_sdt = dm.parallelized(
+        _preprocess,
+        mols_lib.iterrows(),
+        arg_type="args",
+        progress=True,
+        total=len(mols_lib),
+        tqdm_kwargs={"desc": "Standardising compound library"},
+    )
+
+    mols_lib_sdt = pd.DataFrame([r for r in mols_lib_sdt if r is not None])
+
+    # Drop the initial 'ROMol' column to reduce the allocated memory
+    mols_lib_sdt.drop(columns=["ROMol"], inplace=True)
+    mols_lib_sdt.reset_index(inplace=True, drop=True)
+
+    logger.debug(f"There are {mols_lib_sdt.shape[0]} cmpds after standardization")
+
+    # Free up memory by deleting the previous dataframe
+    mols_lib = None
+    gc.collect()
+
+    if not no_filter:
+        logger.info(f"Parsing physchem filters from {input_physchem_props}")
+        with open(input_physchem_props) as f:
+            physchem_properties = yaml.safe_load(f)
+    else:
+        logger.info("Skipping physicochemical property filtering")
+
+    # -----------------------------------------------------------------
+    # Calculating the physicochemical properties of the compounds
+    # -----------------------------------------------------------------
+    if no_filter:
+        # Skip descriptor calculation when not filtering
+        mols_lib_descs = mols_lib_sdt
+    else:
+        logger.info("Calculating physchem properties for the library cmpds")
+        mols_lib_descs = dm.parallelized(
+            _calculate_descriptors,
+            mols_lib_sdt.iterrows(),
+            arg_type="args",
+            progress=True,
+            total=len(mols_lib_sdt),
+            tqdm_kwargs={"desc": "Calculating physchem properties"},
+        )
+
+        mols_lib_descs = pd.DataFrame(mols_lib_descs)
+
+        # Free up memory by deleting the previous dataframe
+        mols_lib_sdt = None
+        gc.collect()
+
+    # -----------------------------------------------------------------
+    # Filtering cmpds using physicochemical properties criteria
+    # -----------------------------------------------------------------
+
+    if no_filter:
+        logger.info("Bypassing physicochemical property filters")
+        mols_lib_filt = mols_lib_descs.copy()
+    else:
+        logger.info("Applying physicochemical property filters")
+        mols_lib_filt = _apply_physchem_filters(mols_lib_descs, physchem_properties)
+
+    logger.debug(f"There are {mols_lib_filt.shape[0]} cmpds after filtering step")
 
     # Adding now the ROMol objects
     mols_lib_filt["ROMol"] = mols_lib_filt.smiles_sdt.apply(Chem.MolFromSmiles)

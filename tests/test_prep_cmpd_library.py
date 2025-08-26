@@ -1,6 +1,8 @@
 import pandas as pd
+import pytest
+from click.testing import CliRunner
 
-from lig3dlens.prep_cmpd_library import _calculate_descriptors
+from lig3dlens.prep_cmpd_library import _calculate_descriptors, main
 
 
 class TestCalculateDescriptors:
@@ -50,3 +52,59 @@ class TestCalculateDescriptors:
             "heavy_atms",
             "stereo_cntrs",
         ]
+
+
+class TestPrepCmdLibraryCLI:
+    @pytest.fixture
+    def runner(self):
+        return CliRunner()
+
+    def test_no_options_provided_raises_error(self, runner):
+        """Test that missing both --filter and --no-filter raises error"""
+        result = runner.invoke(main, ["--in", "dummy.sdf", "--out", "dummy_out.sdf"])
+
+        # Should fail with specific error message
+        assert result.exit_code == 1
+        assert (
+            "Must provide either --filter <yaml_file> or --no-filter" in result.output
+        )
+
+    def test_help_shows_new_options(self, runner):
+        """Test that help text shows both filter options"""
+        result = runner.invoke(main, ["--help"])
+
+        assert result.exit_code == 0
+        assert "--filter" in result.output
+        assert "--no-filter" in result.output
+        assert "Skip physicochemical property filtering entirely" in result.output
+
+    def test_no_filter_flag_validation(self, runner):
+        """Test that --no-filter flag is properly recognized"""
+        # This will fail due to missing input file, but should pass validation
+        result = runner.invoke(
+            main, ["--in", "nonexistent.sdf", "--no-filter", "--out", "dummy_out.sdf"]
+        )
+
+        # Should fail on file not found, not on validation
+        assert result.exit_code == 1
+        # Should not see the validation error message
+        assert "Must provide either --filter" not in result.output
+
+    def test_both_options_provided_raises_error(self, runner):
+        """Test that providing both --filter and --no-filter raises error"""
+        result = runner.invoke(
+            main,
+            [
+                "--in",
+                "dummy.sdf",
+                "--filter",
+                "dummy.yaml",
+                "--no-filter",
+                "--out",
+                "dummy_out.sdf",
+            ],
+        )
+
+        # Should fail with specific error message
+        assert result.exit_code == 1
+        assert "Cannot provide both --no-filter and --filter options" in result.output

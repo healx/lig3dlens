@@ -4,7 +4,7 @@ Bill Tatsis, Matt Seddon, Dan Mason, Dan O'Donovan, Gio Cincilla, Azedine Zoufir
 
 Lig3DLens performs the following tasks:
 1. Prepares a commercial compound library to be used for a VS campaign. This task
-involves: i) compound standardisation and ii) filtering out compounds outside a predefined range of physicochemical properties.
+involves: i) compound standardisation and ii) optional filtering of compounds outside a predefined range of physicochemical properties.
 2. Generates conformers for all of the compounds in the commercial library and calculates their 3D similarity (shape & electrostatics) to a reference compound.
 3. Finally, it can cluster the highest scoring hits and select a set number of representative compounds that can be ordered and tested.
 
@@ -31,9 +31,16 @@ tox
 > **Note**
 > In order to keep track of the library cmpds the input file should have a column containing the text "ID"
 
+**With physicochemical filtering (default):**
 ```
-lig3lens-prepare --in input_SD_file --filter physchem_yaml_file --out output_SD_file
+lig3dlens-prepare --in input_SD_file --filter physchem_yaml_file --out output_SD_file
 ```
+
+**Without filtering (standardization only):**
+```
+lig3dlens-prepare --in input_SD_file --no-filter --out output_SD_file
+```
+Use `--no-filter` when filtering has already been performed or when no filtering is desired. This significantly improves performance by skipping descriptor calculations.
 
 2. Generates 3D conformers for both the library and reference compounds and scores the library compounds using a 3D shape & electrostatics similarity function to the reference molecule
 > **Note**
@@ -58,11 +65,18 @@ lig3dlens-cluster –-in input_SD_file –-clusters num_clusters –-out output_
 ### Example
 To run `lig3dlens` with the input files (reference molecule and compound library) included in this repository;
 
-... preparing the compound library for virtual screening
+... preparing the compound library for virtual screening (with filtering)
 ```shell
 lig3dlens-prepare --in tests/test_data/Enamine_hts_collection_202303_first500_VS_results.sdf \
     --filter lig3dlens/physchem_properties.yaml \
-    --out curated_compounds.sd
+    --out curated_compounds.sdf
+```
+
+... or without filtering (standardization only, faster)
+```shell
+lig3dlens-prepare --in tests/test_data/Enamine_hts_collection_202303_first500_VS_results.sdf \
+    --no-filter \
+    --out standardized_compounds.sdf
 ```
 
 ... generate the 3D conformers for both reference and library compounds, score the compounds in the library set using a 3D shape and electrostatics similarity
