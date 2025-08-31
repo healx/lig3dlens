@@ -2,7 +2,7 @@ from setuptools import find_packages, setup
 
 setup(
     name="lig3dlens",
-    version="0.0.3",
+    version="0.1.0",
     url="https://github.com/healx/lig3dlens.git",
     description="Open source ligand-based 3D VS toolbox",
     packages=find_packages(include=["lig3dlens", "lig3dlens.*"]),
