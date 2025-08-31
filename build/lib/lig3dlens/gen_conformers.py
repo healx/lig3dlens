@@ -19,7 +19,7 @@ def generate_conformers(
     num_conformers: int,
     prune_rms_threshold: float = 0.5,
     add_hydrogens: bool = True,
-    optimize: bool = True, # this option needs to be ON!
+    optimize: bool = True,
 ) -> Mol:
     """
     Generate RDKit conformers for a Mol object.
@@ -42,20 +42,19 @@ def generate_conformers(
     Mol
         Mutated Mol object with conformers generated.
     """
- 
-    params = ETKDGv3() # 
 
-    mol = Mol(molecule)
-    mol.RemoveAllConformers()
+    molecule.RemoveAllConformers()
 
-    # Add "explicit" hydrogens
+    # Make hydrogens explicit
     if add_hydrogens:
-        mol = Chem.AddHs(mol, addCoords=True)
+        molecule = Chem.AddHs(molecule, addCoords=True)
 
-    cids = AllChem.EmbedMultipleConfs(
-        mol,
+    #params = ETKDGv3() # Use the ETKDGv3 method for better conformer generation
+    
+    AllChem.EmbedMultipleConfs(
+        molecule,
         numConfs=num_conformers,
-        params=params, 
+      #  params=params,
         maxAttempts=100,
         pruneRmsThresh=prune_rms_threshold,
         useExpTorsionAnglePrefs=True,
@@ -66,20 +65,17 @@ def generate_conformers(
         numThreads=0,
     )
 
-    if len(cids) == 0:
-        raise ValueError(
-            "Failed to generate any 3D conformers for "
-            f"{Chem.MolToSmiles(Chem.RemoveHs(mol))}"
-        )
-
     if optimize:
-        try:
-            # Energy-minimize the conformers
-            AllChem.MMFFOptimizeMoleculeConfs(mol, mmffVariant="MMFF94s", numThreads=0)
-        except Exception as e:
-            logger.warning(f"Could not optimize conformers due to an error: {e}")
+        AllChem.MMFFOptimizeMoleculeConfs(molecule, mmffVariant="MMFF94s")
 
-    return mol
+    # Trying to catch some edge cases (mainly with bridged ring systems)
+    if molecule.GetNumConformers() > 0:
+        return molecule
+    else:
+        logger.error(
+            "Failed to generate 3D confs for "
+            + Chem.MolToSmiles(Chem.RemoveHs(molecule)),
+        )
 
 
 def conf_gen(molecule: Mol, mol_id: str, num_conformers: int) -> Tuple[str, Mol]:
