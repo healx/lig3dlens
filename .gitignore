@@ -8,3 +8,7 @@ __pycache__
 
 # test artefacts
 *.tox
+
+# build artefacts
+build
+dist
