@@ -43,7 +43,12 @@ def generate_conformers(
         Mutated Mol object with conformers generated.
     """
 
-    params = ETKDGv3()  #
+    params = ETKDGv3()
+    # Configure embedding parameters explicitly rather than mixing signatures
+    params.pruneRmsThresh = prune_rms_threshold
+    params.randomSeed = 42
+    params.useRandomCoords = True
+    params.enforceChirality = True
 
     mol = Mol(molecule)
     mol.RemoveAllConformers()
@@ -52,19 +57,7 @@ def generate_conformers(
     if add_hydrogens:
         mol = Chem.AddHs(mol, addCoords=True)
 
-    cids = AllChem.EmbedMultipleConfs(
-        mol,
-        numConfs=num_conformers,
-        params=params,
-        maxAttempts=100,
-        pruneRmsThresh=prune_rms_threshold,
-        useExpTorsionAnglePrefs=True,
-        useBasicKnowledge=True,
-        useRandomCoords=True,
-        randomSeed=42,
-        enforceChirality=True,
-        numThreads=0,
-    )
+    cids = AllChem.EmbedMultipleConfs(mol, numConfs=num_conformers, params=params)
 
     if len(cids) == 0:
         raise ValueError(
