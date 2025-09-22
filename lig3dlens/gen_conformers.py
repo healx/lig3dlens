@@ -19,7 +19,7 @@ def generate_conformers(
     num_conformers: int,
     prune_rms_threshold: float = 0.5,
     add_hydrogens: bool = True,
-    optimize: bool = True, # this option needs to be ON!
+    optimize: bool = True,  # this option needs to be ON!
 ) -> Mol:
     """
     Generate RDKit conformers for a Mol object.
@@ -42,8 +42,8 @@ def generate_conformers(
     Mol
         Mutated Mol object with conformers generated.
     """
- 
-    params = ETKDGv3() # 
+
+    params = ETKDGv3()  #
 
     mol = Mol(molecule)
     mol.RemoveAllConformers()
@@ -55,7 +55,7 @@ def generate_conformers(
     cids = AllChem.EmbedMultipleConfs(
         mol,
         numConfs=num_conformers,
-        params=params, 
+        params=params,
         maxAttempts=100,
         pruneRmsThresh=prune_rms_threshold,
         useExpTorsionAnglePrefs=True,
