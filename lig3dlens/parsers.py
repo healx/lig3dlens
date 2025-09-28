@@ -39,7 +39,7 @@ class MolFileReader:
             if ref_mol.GetConformer().Is3D():
                 lig_3D_flag = True
                 # Add hydrogens to the reference molecule
-                ref_mol = Chem.AddHs(ref_mol)
+                ref_mol = Chem.AddHs(ref_mol, addCoords=True)
         except ValueError as e:
             if "Bad Conformer Id" in str(e):
                 lig_3D_flag = False
@@ -59,8 +59,15 @@ class MolFileReader:
         sdsuppl = Chem.SDMolSupplier(file_path)
         # Read the first molecule from the SD file
         m1 = next(sdsuppl, None)
+
+        if m1 is None:
+            raise ValueError("No valid molecule(s) in the SDF file.")
+
         # Check if the first library compound has a 3D conformation
         # Infer the same for the rest of the molecules in the same input file!
+
+        # Initialize the lib_3D_flag variable with a default value
+        lib_3D_flag = False
         try:
             if m1.GetConformer().Is3D():
                 lib_3D_flag = True

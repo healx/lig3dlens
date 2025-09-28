@@ -93,3 +93,5 @@ def test_sdf_parser_reads_sdf(sdf_path):
         "".join(map(lambda atom: atom.GetSymbol(), sdf[0].GetAtoms()))
         == "CNCNCCCONCONCCHHHHHHHHHH"
     )
+    # Confirm 3D flag is detected for SDF with 3D coordinates
+    assert sdf[1] is True

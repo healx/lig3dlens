@@ -11,6 +11,7 @@ from typing import Tuple
 from loguru import logger
 from rdkit import Chem
 from rdkit.Chem import AllChem, Mol
+from rdkit.Chem.rdDistGeom import ETKDGv3
 
 
 def generate_conformers(
@@ -18,7 +19,7 @@ def generate_conformers(
     num_conformers: int,
     prune_rms_threshold: float = 0.5,
     add_hydrogens: bool = True,
-    optimize: bool = False,
+    optimize: bool = True,  # this option needs to be ON!
 ) -> Mol:
     """
     Generate RDKit conformers for a Mol object.
@@ -42,36 +43,36 @@ def generate_conformers(
         Mutated Mol object with conformers generated.
     """
 
-    molecule.RemoveAllConformers()
+    params = ETKDGv3()
+    # Configure embedding parameters explicitly rather than mixing signatures
+    params.pruneRmsThresh = prune_rms_threshold
+    params.randomSeed = 42
+    params.useRandomCoords = True
+    params.enforceChirality = True
 
-    # Make hydrogens explicit
+    mol = Mol(molecule)
+    mol.RemoveAllConformers()
+
+    # Add "explicit" hydrogens
     if add_hydrogens:
-        molecule = Chem.AddHs(molecule)
+        mol = Chem.AddHs(mol, addCoords=True)
 
-    AllChem.EmbedMultipleConfs(
-        molecule,
-        numConfs=num_conformers,
-        maxAttempts=100,
-        pruneRmsThresh=prune_rms_threshold,
-        useExpTorsionAnglePrefs=True,
-        useBasicKnowledge=True,
-        useRandomCoords=True,
-        randomSeed=42,
-        enforceChirality=True,
-        numThreads=0,
-    )
+    cids = AllChem.EmbedMultipleConfs(mol, numConfs=num_conformers, params=params)
+
+    if len(cids) == 0:
+        raise ValueError(
+            "Failed to generate any 3D conformers for "
+            f"{Chem.MolToSmiles(Chem.RemoveHs(mol))}"
+        )
 
     if optimize:
-        AllChem.MMFFOptimizeMoleculeConfs(molecule, mmffVariant="MMFF94s")
+        try:
+            # Energy-minimize the conformers
+            AllChem.MMFFOptimizeMoleculeConfs(mol, mmffVariant="MMFF94s", numThreads=0)
+        except Exception as e:
+            logger.warning(f"Could not optimize conformers due to an error: {e}")
 
-    # Trying to catch some edge cases (mainly with bridged ring systems)
-    if molecule.GetNumConformers() > 0:
-        return molecule
-    else:
-        logger.error(
-            "Failed to generate 3D confs for "
-            + Chem.MolToSmiles(Chem.RemoveHs(molecule)),
-        )
+    return mol
 
 
 def conf_gen(molecule: Mol, mol_id: str, num_conformers: int) -> Tuple[str, Mol]:
