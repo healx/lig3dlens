@@ -5,13 +5,14 @@ setup(
     version="0.1.0",
     url="https://github.com/healx/lig3dlens.git",
     description="Open source ligand-based 3D VS toolbox",
+    python_requires=">=3.10",
     packages=find_packages(include=["lig3dlens", "lig3dlens.*"]),
     install_requires=[
         # pin RDKit to reduce breakages
         "rdkit~=2024.9",
         # undocumented RDKit pins
-        "pandas~=1.5",
-        "numpy~=1.21",
+        "pandas>=2.2,<3",
+        "numpy>=1.26,<2",
     ],
     entry_points={
         "console_scripts": [

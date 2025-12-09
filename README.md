@@ -14,6 +14,8 @@ involves: i) compound standardisation and ii) optional filtering of compounds ou
 ```
 python -m pip install -r requirements.txt .
 ```
+> Requires Python 3.10 or newer (tested with Python 3.12).
+
 ... for development
 ```
 python -m pip install -r requirements.txt -r dev-requirements -e .
